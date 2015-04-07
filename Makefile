@@ -15,7 +15,7 @@
 # The values of DEBUG and DMALLOC variables do not matter, it's just about
 # whether they're defined, so e.g. 'make DEBUG=1' will trigger a debug build.
 
-NAME := mintty
+NAME := thyme
 
 ifdef TARGET
   CC := $(TARGET)-gcc

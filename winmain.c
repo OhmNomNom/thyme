@@ -32,6 +32,7 @@ static bool borderless_on_max;
 static bool resizing;
 
 static HBITMAP caretbm;
+const int padding = 100;
 
 #if WINVER < 0x600
 
@@ -169,6 +170,14 @@ get_monitor_info(MONITORINFO *mip)
   GetMonitorInfo(mon, mip);
 }
 
+static void
+get_workarea_info(MONITORINFO *mip)
+{
+  HMONITOR mon = MonitorFromWindow(wnd, MONITOR_DEFAULTTONEAREST);
+  mip->cbSize = sizeof(MONITORINFO);
+  GetMonitorInfo(mon, mip);
+}
+
 /*
  * Minimise or restore the window in response to a server-side
  * request.
@@ -222,7 +231,7 @@ win_get_pixels(int *height_p, int *width_p)
   RECT r;
   GetWindowRect(wnd, &r);
   *height_p = r.bottom - r.top;
-  *width_p = r.right - r.left;
+  *width_p = r.right - r.left - padding;
 }
 
 void
@@ -347,6 +356,12 @@ static void make_borderless(void) {
 
  /* The glass effect doesn't work for borderless windows */
   update_glass();
+  
+  MONITORINFO mi;
+  get_workarea_info(&mi);
+  RECT fr = mi.rcWork;
+  SetWindowPos(wnd, HWND_TOP, fr.left, fr.top,
+               fr.right - fr.left, fr.bottom - fr.top, SWP_FRAMECHANGED);
 }
 
 /*

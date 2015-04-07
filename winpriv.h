@@ -20,7 +20,7 @@ extern LOGFONT lfont;
 
 extern int font_width, font_height;
 
-enum { PADDING = 1 };
+enum { PADDING = 10, XPADDING = 10, YPADDING = 1 };
 
 void win_paint(void);
 
