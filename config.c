@@ -275,6 +275,7 @@ static opt_val
     {"min", 2},    // SW_SHOWMINIMIZED
     {"max", 3},    // SW_SHOWMAXIMIZED
     {"full", -1},
+    {"borderless", -2},
     {0, 0}
   },
   [OPT_HOLD] = (opt_val[]) {

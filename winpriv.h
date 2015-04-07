@@ -53,6 +53,6 @@ void win_switch(bool back);
 
 void win_set_ime_open(bool);
 
-bool win_is_fullscreen;
+bool win_is_fullscreen, win_is_borderless;
 
 #endif

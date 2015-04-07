@@ -28,6 +28,7 @@ static ATOM class_atom;
 
 static int extra_width, extra_height;
 static bool fullscr_on_max;
+static bool borderless_on_max;
 static bool resizing;
 
 static HBITMAP caretbm;
@@ -328,10 +329,24 @@ update_glass(void)
 {
   if (pDwmExtendFrameIntoClientArea) {
     bool enabled =
-      cfg.transparency == TR_GLASS && !win_is_fullscreen &&
+      cfg.transparency == TR_GLASS && !win_is_borderless&&
       !(cfg.opaque_when_focused && term.has_focus);
     pDwmExtendFrameIntoClientArea(wnd, &(MARGINS){enabled ? -1 : 0, 0, 0, 0});
   }
+}
+
+
+static void make_borderless(void) {
+
+  win_is_borderless = true;
+  
+  /* Remove the window furniture. */
+  LONG style = GetWindowLong(wnd, GWL_STYLE);
+  style &= ~(WS_CAPTION | WS_BORDER | WS_THICKFRAME);
+  SetWindowLong(wnd, GWL_STYLE, style);
+
+ /* The glass effect doesn't work for borderless windows */
+  update_glass();
 }
 
 /*
@@ -343,14 +358,8 @@ make_fullscreen(void)
 {
   win_is_fullscreen = true;
 
- /* Remove the window furniture. */
-  LONG style = GetWindowLong(wnd, GWL_STYLE);
-  style &= ~(WS_CAPTION | WS_BORDER | WS_THICKFRAME);
-  SetWindowLong(wnd, GWL_STYLE, style);
-
- /* The glass effect doesn't work for fullscreen windows */
-  update_glass();
-
+  make_borderless();
+  
  /* Resize ourselves to exactly cover the nearest monitor. */
   MONITORINFO mi;
   get_monitor_info(&mi);
@@ -359,6 +368,19 @@ make_fullscreen(void)
                fr.right - fr.left, fr.bottom - fr.top, SWP_FRAMECHANGED);
 }
 
+
+//Clear the borderless attributes
+static void
+clear_borderless(void) {
+  win_is_borderless = false;
+  update_glass();
+
+ /* Reinstate the window furniture. */
+  LONG style = GetWindowLong(wnd, GWL_STYLE);
+  style |= WS_CAPTION | WS_BORDER | WS_THICKFRAME;
+  SetWindowLong(wnd, GWL_STYLE, style);
+ }
+
 /*
  * Clear the full-screen attributes.
  */
@@ -366,12 +388,8 @@ static void
 clear_fullscreen(void)
 {
   win_is_fullscreen = false;
-  update_glass();
-
- /* Reinstate the window furniture. */
-  LONG style = GetWindowLong(wnd, GWL_STYLE);
-  style |= WS_CAPTION | WS_BORDER | WS_THICKFRAME;
-  SetWindowLong(wnd, GWL_STYLE, style);
+  clear_borderless();
+  
   SetWindowPos(wnd, null, 0, 0, 0, 0,
                SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 }
@@ -384,14 +402,20 @@ void
 win_maximise(int max)
 {
   if (IsZoomed(wnd)) {
-    if (!max)
+    if (!max) {
       ShowWindow(wnd, SW_RESTORE);
-    else if (max == 2 && !win_is_fullscreen)
+     }
+    else if (max == 3 && !win_is_fullscreen)
       make_fullscreen();
+    else if (max == 2 && !win_is_borderless)
+      make_borderless();
   }
   else if (max) {
-    if (max == 2)
+    if (max == 3)
       fullscr_on_max = true;
+    else if (max == 2)
+      borderless_on_max = true;
+      
     ShowWindow(wnd, SW_MAXIMIZE);
   }
 }
@@ -637,9 +661,14 @@ win_proc(HWND wnd, UINT message, WPARAM wp, LPARAM lp)
     when WM_SIZE: {
       if (wp == SIZE_RESTORED && win_is_fullscreen)
         clear_fullscreen();
+      else if (wp == SIZE_RESTORED && win_is_borderless)
+        clear_borderless();
       else if (wp == SIZE_MAXIMIZED && fullscr_on_max) {
         fullscr_on_max = false;
         make_fullscreen();
+      } else if (wp == SIZE_MAXIMIZED && borderless_on_max) {
+        borderless_on_max = false;
+        make_borderless();
       }
       
       if (!resizing)
@@ -1036,7 +1065,8 @@ main(int argc, char *argv[])
 
   // Finally show the window!
   fullscr_on_max = (cfg.window == -1);
-  ShowWindow(wnd, fullscr_on_max ? SW_SHOWMAXIMIZED : cfg.window);
+  borderless_on_max = (cfg.window == -2);
+  ShowWindow(wnd, (fullscr_on_max || borderless_on_max) ? SW_SHOWMAXIMIZED : cfg.window);
 
   // Message loop.
   for (;;) {
