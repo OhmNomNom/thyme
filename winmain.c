@@ -347,6 +347,7 @@ update_glass(void)
 static void make_borderless(void) {
 
   win_is_borderless = true;
+  win_is_fullscreen = false;
   
   /* Remove the window furniture. */
   LONG style = GetWindowLong(wnd, GWL_STYLE);
@@ -371,8 +372,15 @@ static void
 make_fullscreen(void)
 {
   win_is_fullscreen = true;
+  win_is_borderless = false;
+  
+  /* Remove the window furniture. */
+  LONG style = GetWindowLong(wnd, GWL_STYLE);
+  style &= ~(WS_CAPTION | WS_BORDER | WS_THICKFRAME);
+  SetWindowLong(wnd, GWL_STYLE, style);
 
-  make_borderless();
+ /* The glass effect doesn't work for borderless windows */
+  update_glass();
   
  /* Resize ourselves to exactly cover the nearest monitor. */
   MONITORINFO mi;
@@ -402,7 +410,12 @@ static void
 clear_fullscreen(void)
 {
   win_is_fullscreen = false;
-  clear_borderless();
+  update_glass();
+
+ /* Reinstate the window furniture. */
+  LONG style = GetWindowLong(wnd, GWL_STYLE);
+  style |= WS_CAPTION | WS_BORDER | WS_THICKFRAME;
+  SetWindowLong(wnd, GWL_STYLE, style);
   
   SetWindowPos(wnd, null, 0, 0, 0, 0,
                SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
@@ -410,7 +423,7 @@ clear_fullscreen(void)
 
 /*
  * Maximise or restore the window in response to a server-side request.
- * Argument value of 2 means go fullscreen.
+ * Argument value of 3 means go fullscreen, 2 means go borderles.
  */
 void
 win_maximise(int max)
@@ -558,7 +571,8 @@ win_proc(HWND wnd, UINT message, WPARAM wp, LPARAM lp)
         when IDM_SELALL: term_select_all(); win_update();
         when IDM_RESET: term_reset(); win_update();
         when IDM_DEFSIZE: default_size();
-        when IDM_FULLSCREEN: win_maximise(win_is_fullscreen ? 0 : 2);
+        when IDM_FULLSCREEN: win_maximise(win_is_fullscreen ? 0 : 3);
+        when IDM_BORDERLESS: win_maximise(win_is_borderless ? 0 : 2);
         when IDM_FLIPSCREEN: term_flip_screen();
         when IDM_OPTIONS: win_open_config();
         when IDM_NEW: child_fork(main_argv);

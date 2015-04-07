@@ -20,5 +20,6 @@
 #define IDM_OPTIONS     0x0090
 #define IDM_NEW         0x00a0
 #define IDM_COPYTITLE   0x00b0
+#define IDM_BORDERLESS  0x00c0
 
 #endif

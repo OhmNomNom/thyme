@@ -58,7 +58,7 @@ win_update_menus(void)
     ? MF_ENABLED : MF_GRAYED;
   ModifyMenu(
     menu, IDM_DEFSIZE, defsize_enabled, IDM_DEFSIZE,
-    alt_fn ? "&Default size\tAlt+F10" :
+    alt_fn ? "&Default size\tAlt+F9" :
     ct_sh ? "&Default size\tCtrl+Shift+D" : "&Default size"
   );
 
@@ -69,6 +69,13 @@ win_update_menus(void)
     ct_sh ? "&Full Screen\tCtrl+Shift+F" : "&Full Screen"
   );
 
+  uint borderless_checked = win_is_borderless ? MF_CHECKED : MF_UNCHECKED;
+  ModifyMenu(
+    menu, IDM_BORDERLESS, borderless_checked, IDM_BORDERLESS,
+    alt_fn ? "&Borderless\tAlt+F10" :
+    ct_sh ? "&Borderless\tCtrl+Shift+J" : "&Borderless"
+  );
+  
   uint otherscreen_checked = term.show_other_screen ? MF_CHECKED : MF_UNCHECKED;
   ModifyMenu(
     menu, IDM_FLIPSCREEN, otherscreen_checked, IDM_FLIPSCREEN,
@@ -94,6 +101,7 @@ win_init_menus(void)
   AppendMenu(menu, MF_ENABLED, IDM_RESET, 0);
   AppendMenu(menu, MF_SEPARATOR, 0, 0);
   AppendMenu(menu, MF_ENABLED | MF_UNCHECKED, IDM_DEFSIZE, 0);
+  AppendMenu(menu, MF_ENABLED | MF_UNCHECKED, IDM_BORDERLESS, 0);
   AppendMenu(menu, MF_ENABLED | MF_UNCHECKED, IDM_FULLSCREEN, 0);
   AppendMenu(menu, MF_ENABLED | MF_UNCHECKED, IDM_FLIPSCREEN, 0);
   AppendMenu(menu, MF_SEPARATOR, 0, 0);
@@ -187,8 +195,8 @@ static pos
 translate_pos(int x, int y)
 {
   return (pos){
-    .x = floorf((x - PADDING) / (float)font_width ),
-    .y = floorf((y - PADDING) / (float)font_height), 
+    .x = floorf((x - XPADDING) / (float)font_width ),
+    .y = floorf((y - YPADDING) / (float)font_height), 
   };
 }
 
@@ -399,7 +407,8 @@ win_key_down(WPARAM wp, LPARAM lp)
           when VK_F2:  send_syscommand(IDM_NEW);
           when VK_F4:  send_syscommand(SC_CLOSE);
           when VK_F8:  send_syscommand(IDM_RESET);
-          when VK_F10: send_syscommand(IDM_DEFSIZE);
+          when VK_F9: send_syscommand(IDM_DEFSIZE);
+          when VK_F10: send_syscommand(IDM_BORDERLESS);
           when VK_F11: send_syscommand(IDM_FULLSCREEN);
           when VK_F12: send_syscommand(IDM_FLIPSCREEN);
         }
@@ -418,6 +427,7 @@ win_key_down(WPARAM wp, LPARAM lp)
         when 'R': send_syscommand(IDM_RESET);
         when 'D': send_syscommand(IDM_DEFSIZE);
         when 'F': send_syscommand(IDM_FULLSCREEN);
+        when 'J': send_syscommand(IDM_BORDERLESS);
         when 'S': send_syscommand(IDM_FLIPSCREEN);
       }
       return 1;
