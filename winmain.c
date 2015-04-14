@@ -307,6 +307,7 @@ win_adapt_term_size(void)
   RECT cr, wr;
   GetClientRect(wnd, &cr);
   GetWindowRect(wnd, &wr);
+
   int client_width = cr.right - cr.left;
   int client_height = cr.bottom - cr.top;
   extra_width = wr.right - wr.left - client_width;
@@ -321,6 +322,10 @@ win_adapt_term_size(void)
     child_resize(&ws);
   }
   win_invalidate_all();
+  if(win_is_borderless) {
+    win_is_borderless = false;
+    win_maximise(2);
+    }
 }
 
 bool
@@ -362,6 +367,8 @@ static void make_borderless(void) {
   RECT fr = mi.rcWork;
   SetWindowPos(wnd, HWND_TOP, fr.left, fr.top,
                fr.right - fr.left, fr.bottom - fr.top, SWP_FRAMECHANGED);
+               
+               
 }
 
 /*
@@ -388,6 +395,7 @@ make_fullscreen(void)
   RECT fr = mi.rcMonitor;
   SetWindowPos(wnd, HWND_TOP, fr.left, fr.top,
                fr.right - fr.left, fr.bottom - fr.top, SWP_FRAMECHANGED);
+               
 }
 
 
@@ -438,11 +446,13 @@ win_maximise(int max)
       make_borderless();
   }
   else if (max) {
-    if (max == 3)
+    if (max == 3) {
       fullscr_on_max = true;
-    else if (max == 2)
+      borderless_on_max = false;
+    } else if (max == 2) {
       borderless_on_max = true;
-      
+      fullscr_on_max = false;
+    }
     ShowWindow(wnd, SW_MAXIMIZE);
   }
 }
@@ -795,6 +805,7 @@ warn(char *format, ...)
 int
 main(int argc, char *argv[])
 {
+  setbuf(stdout, NULL);
   main_argv = argv;
   load_dwm_funcs();
   init_config();
