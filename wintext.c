@@ -328,10 +328,10 @@ win_paint(void)
   dc = BeginPaint(wnd, &p);
 
   term_invalidate(
-    (p.rcPaint.left - XPADDING) / font_width,
-    (p.rcPaint.top - YPADDING) / font_height,
-    (p.rcPaint.right - XPADDING - 1) / font_width,
-    (p.rcPaint.bottom - YPADDING - 1) / font_height
+    (p.rcPaint.left - PADDING) / font_width,
+    (p.rcPaint.top - PADDING) / font_height,
+    (p.rcPaint.right - PADDING - 1) / font_width,
+    (p.rcPaint.bottom - PADDING - 1) / font_height
   );
 
   if (update_state != UPDATE_PENDING)

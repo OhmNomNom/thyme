@@ -163,6 +163,7 @@ options[] = {
   {"Scrollbar", OPT_SCROLLBAR, offcfg(scrollbar)},
   {"ScrollMod", OPT_MOD, offcfg(scroll_mod)},
   {"PgUpDnScroll", OPT_BOOL, offcfg(pgupdn_scroll)},
+  {"BorderlessMax", OPT_BOOL, offcfg(borderless_max)},
 
   // Terminal
   {"Term", OPT_STRING, offcfg(term)},
@@ -1025,6 +1026,10 @@ setup_config_box(controlbox * b)
   ctrl_checkbox(
     s, "&PgUp and PgDn scroll without modifier",
     dlg_stdcheckbox_handler, &new_cfg.pgupdn_scroll
+  );
+  ctrl_checkbox(
+    s, "&Maximize on borderless",
+    dlg_stdcheckbox_handler, &new_cfg.borderless_max
   );
 
  /*

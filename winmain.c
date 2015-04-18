@@ -442,14 +442,14 @@ win_maximise(int max)
      }
     else if (max == 3 && !win_is_fullscreen)
       make_fullscreen();
-    else if (max == 2 && !win_is_borderless)
+    else if ((cfg.borderless_max || max == 2 ) && !win_is_borderless)
       make_borderless();
   }
   else if (max) {
     if (max == 3) {
       fullscr_on_max = true;
       borderless_on_max = false;
-    } else if (max == 2) {
+    } else if ((cfg.borderless_max || max == 2 )) {
       borderless_on_max = true;
       fullscr_on_max = false;
     }
@@ -704,7 +704,7 @@ win_proc(HWND wnd, UINT message, WPARAM wp, LPARAM lp)
       else if (wp == SIZE_MAXIMIZED && fullscr_on_max) {
         fullscr_on_max = false;
         make_fullscreen();
-      } else if (wp == SIZE_MAXIMIZED && borderless_on_max) {
+      } else if (wp == SIZE_MAXIMIZED && (borderless_on_max || cfg.borderless_max)) {
         borderless_on_max = false;
         make_borderless();
       }

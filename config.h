@@ -76,6 +76,7 @@ typedef struct {
   char scrollbar;
   char scroll_mod;
   bool pgupdn_scroll;
+  bool borderless_max;
   // Terminal
   string term;
   string answerback;
