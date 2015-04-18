@@ -164,6 +164,8 @@ options[] = {
   {"ScrollMod", OPT_MOD, offcfg(scroll_mod)},
   {"PgUpDnScroll", OPT_BOOL, offcfg(pgupdn_scroll)},
   {"BorderlessMax", OPT_BOOL, offcfg(borderless_max)},
+  {"XPadding", OPT_INT, offcfg(xpadding)},
+  {"YPadding", OPT_INT, offcfg(ypadding)},
 
   // Terminal
   {"Term", OPT_STRING, offcfg(term)},

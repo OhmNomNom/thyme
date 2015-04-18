@@ -247,8 +247,8 @@ void
 win_set_pixels(int height, int width)
 {
   SetWindowPos(wnd, null, 0, 0,
-               width + 2 * XPADDING + extra_width,
-               height + 2 * YPADDING + extra_height,
+               width + 2 * cfg.xpadding + extra_width,
+               height + 2 * cfg.ypadding + extra_height,
                SWP_NOACTIVATE | SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOZORDER);
 }
 
@@ -312,8 +312,8 @@ win_adapt_term_size(void)
   int client_height = cr.bottom - cr.top;
   extra_width = wr.right - wr.left - client_width;
   extra_height = wr.bottom - wr.top - client_height;
-  int term_width = client_width - 2 * XPADDING;
-  int term_height = client_height - 2 * YPADDING;
+  int term_width = client_width - 2 * cfg.xpadding;
+  int term_height = client_height - 2 * cfg.ypadding;
   int cols = max(1, term_width / font_width);
   int rows = max(1, term_height / font_height);
   if (rows != term.rows || cols != term.cols) {
@@ -670,8 +670,8 @@ win_proc(HWND wnd, UINT message, WPARAM wp, LPARAM lp)
       * 2) Make sure the window size is _stepped_ in units of the font size.
       */
       LPRECT r = (LPRECT) lp;
-      int width = r->right - r->left - extra_width - 2 * XPADDING;
-      int height = r->bottom - r->top - extra_height - 2 * YPADDING;
+      int width = r->right - r->left - extra_width - 2 * cfg.xpadding;
+      int height = r->bottom - r->top - extra_height - 2 * cfg.ypadding;
       int cols = max(1, (float)width / font_width + 0.5);
       int rows = max(1, (float)height / font_height + 0.5);
       
@@ -1025,7 +1025,7 @@ main(int argc, char *argv[])
   int term_width = font_width * cfg.cols;
   int term_height = font_height * cfg.rows;
 
-  RECT cr = {0, 0, term_width + 2 * XPADDING, term_height + 2 * YPADDING};
+  RECT cr = {0, 0, term_width + 2 * cfg.xpadding, term_height + 2 * cfg.ypadding};
   RECT wr = cr;
   AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, false);
   int width = wr.right - wr.left;
